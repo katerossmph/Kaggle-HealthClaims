@@ -6,10 +6,17 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning = TRUE, message = TRUE, error = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
-ggplot2::theme_set(ggplot2::theme_bw())
+library(tidyverse)
+library(lubridate)
+library(janitor)
+library(skimr)
+library(here)
 ```
+
+
+
 
 ## R Markdown
 
