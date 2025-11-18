@@ -15,7 +15,7 @@ library(janitor)
 library(lubridate)
 library(stringr)
 library(tibble)
-library(tidyr)
+library(tidyr) 
 
 #### 01. Load Raw Data ####
 claims <- read_csv("data/raw/healthcare_dataset.csv")

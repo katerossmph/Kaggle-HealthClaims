@@ -15,8 +15,51 @@ library(skimr)
 library(here)
 ```
 
+## Executive Summary
 
+This report represents an exploratory data analysis (EDA) of a synthetic healthcare claims dataset.
 
+Key insights include:
+
+-   **Population Demographics:** The patient population is split evenly by gender, with concentration in the 30-70 years of age range. Age-gender pyramids highlight expected healthcare utilization patterns.
+
+-   **Clinical Case Mix:** Most common conditions include [Top conditions Here]. Distribution of conditions varied by age and gender.
+
+-   **Utilization Patterns:** Admissions fluctuated weekly and don't show any day-of-week patterns. Length-of-stay (LOS) varies by condition and admission type.
+
+-   **Cost Drivers:**
+
+-   **Data Quality:**
+
+-   Correlation Insights
+
+The goal is to simulate a claims analyst workflow, focusing on:
+
+-   Data quality assessment
+
+-   Utilization trends (admissions, length of stay)
+
+-   Cost analysis (billing, insurance variation)
+
+-   Case mix and demographics
+
+-   Clinical variation (conditions, medications, results)
+
+-   Reproducible analytic documentation
+
+These analyses mirror tasks typical for health systems, payers, ACOs, and government health policy agencies.
+
+## Data Cleaning & Processing
+
+## Uni variate Analysis
+
+## Bivariate Analysis
+
+## Time-Series Trends
+
+## Correlation Analysis
+
+## Conclusion 
 
 ## R Markdown
 
