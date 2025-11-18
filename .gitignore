@@ -1,4 +1,46 @@
-.Rproj.user
+# -------------------------------------
+# RStudio / R temporary files
+# -------------------------------------
 .Rhistory
 .RData
-.Ruserdata
+.Rproj.user/
+
+# -------------------------------------
+# OS files (Windows, Mac, etc.)
+# -------------------------------------
+Thumbs.db
+.DS_Store
+
+# -------------------------------------
+# Data files
+# -------------------------------------
+# Ignore raw data to avoid uploading sensitive info or large files
+data/raw/*
+
+# Optionally ignore processed data if you don't want to push large cleaned CSVs
+# Comment this line out if you want processed CSVs tracked
+# data/processed/*
+
+# Keep the folder itself tracked
+!.gitkeep
+
+# -------------------------------------
+# Output files
+# -------------------------------------
+output/figures/*
+output/tables/*
+
+# Keep folders tracked
+!.gitkeep
+
+# -------------------------------------
+# Logs and temporary files
+# -------------------------------------
+*.log
+*.tmp
+
+# -------------------------------------
+# Track all R scripts and R Markdown files
+# -------------------------------------
+!scripts/*.R
+!scripts/*.Rmd
