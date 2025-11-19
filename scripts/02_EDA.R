@@ -6,6 +6,8 @@
 
 ######## 1. Setup & Pre-Processing ########
 install.packages("skimr")
+install.packages("esquisse")
+install.packages("kableExtra")
 
 # Load packages
 library(tidyverse)
@@ -14,9 +16,10 @@ library(lubridate)
 library(here)
 library(dplyr)
 library(skimr)
+library(esquisse)
 
 # Load cleaned dataset
-source("scripts/01_data_cleaning.R")
+source(here::here("scripts", "01_data_cleaning.R"))
 
 # ---- Missingness ----
 missing_summary <- clean_df %>%
@@ -274,7 +277,7 @@ admissions_time <- clean_df %>%
 ggplot(admissions_time, aes(date_of_admission, n)) +
   geom_line() +
   labs(title = "Admissions Over Time", 
-       x = "Date", y = "Number of Admissions") +
+       x = "Date of Admission", y = "Number of Admissions") +
   theme_minimal()
 
 ggsave(here("outputs/figures/admissions_over_time.png"))
@@ -310,6 +313,8 @@ top_conditions <- clean_df %>%
 
 write_csv(top_conditions,
           here("outputs/tables/top_medical_conditions.csv"))
+
+esquisse:esquisser(data = clean_df)
 
 # ============================================================
 # 7. Save session info for reproducibility

@@ -2,17 +2,49 @@
 title: "Healthcare Claims Data"
 author: "Kate Ross"
 date: "2025-11-18"
-output: html_document
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_sections: true
+    theme: flatly
+    highlight: tango
+fontsize: 11pt
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+# ============================================================
+# Setup Chunk - Load Packages, Options, and Source Scripts
+# ============================================================
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 8,
+  fig.height = 4
+)
+# -------------------------------
+# Load Required Packages
+# -------------------------------
 
-library(tidyverse)
-library(lubridate)
-library(janitor)
-library(skimr)
-library(here)
+library(tidyverse)   # Data wrangling and visualization
+library(lubridate)   # Dates handling
+library(janitor)     # Clean column names
+library(skimr)       # Summary statistics
+library(here)        # Project-based file paths
+library(dplyr)
+library(knitr)
+# library(kableExtra)
+
+raw_path <- here("data", "raw", "healthcare_dataset.csv")
+
+if(!file.exists(raw_path)) {
+  stop("Raw dataset not found at: ", raw_path)
+}
+
+df <- read_csv(raw_path) %>% clean_names()
+
 ```
 
 ## Executive Summary
@@ -21,45 +53,253 @@ This report represents an exploratory data analysis (EDA) of a synthetic healthc
 
 Key insights include:
 
--   **Population Demographics:** The patient population is split evenly by gender, with concentration in the 30-70 years of age range. Age-gender pyramids highlight expected healthcare utilization patterns.
+-   **Population Demographics:** The patient population is split evenly by gender, with a concentration in the 30-70 years of age range. Age-gender pyramids highlight expected healthcare utilization patterns.
 
--   **Clinical Case Mix:** Most common conditions include [Top conditions Here]. Distribution of conditions varied by age and gender.
+-   **Clinical Case Mix:** Most common conditions include [Top conditions Here]. The distribution of conditions varied by age and gender.
 
 -   **Utilization Patterns:** Admissions fluctuated weekly and don't show any day-of-week patterns. Length-of-stay (LOS) varies by condition and admission type.
 
--   **Cost Drivers:**
+-   **Cost Drivers:** Billing amounts vary by insurance provider and admission type. Median and mean billing reveal payer mix and potential outlier cases.
 
--   **Data Quality:**
+-   **Data Quality:** Dataset completeness and data type checks show low missingness and few duplicates, demonstrating readiness for further modeling or reporting.
 
--   Correlation Insights
+-   **Correlation Insights:** Relationships among age, LOS, billing, and encoded categorical variables inform potential predictive models and cost analysis.
 
-The goal is to simulate a claims analyst workflow, focusing on:
+This report is structured to demonstrate analytical rigor, reproducibility, and insights relevant to healthcare claims data analysis roles.
 
--   Data quality assessment
+## Codebook: In-Depth Variable Reference
 
--   Utilization trends (admissions, length of stay)
+This codebook summarizes all variables, their types, descriptions, categories/levels (if categorical), summary statistics (if numeric), missing values, and notes on recording or transformations.
 
--   Cost analysis (billing, insurance variation)
+```{r Codebook, echo = FALSE}
 
--   Case mix and demographics
+# codebook <- df %>%
+#  summarise(across(everything(), list(
+#    type = ~class(.),
+#    missing = ~sum(is.na(.)),
+#    n_unique = ~n_distinct(.),
+#    mean = ~if(is.numeric(.)) mean(., na.rm=TRUE) else NA,
+#    sd = ~if(is.numeric(.)) sd(., na.rm=TRUE) else NA,
+#    min = ~if(is.numeric(.)) min(., na.rm=TRUE) else NA,
+#    max = ~if(is.numeric(.)) max(., na.rm=TRUE) else NA
+#  ))) 
 
--   Clinical variation (conditions, medications, results)
+# Convert to Long Format Safely
+#codebook_long <- tibble(
+#  Variable = names(df),
+#  Type = sapply(df, class),
+#  Missing = sapply(df, function(x) sum(is.na(x))),
+#  N_Unique = sapply(df, function(x) n_distinct(x)),
+#  Mean = sapply(df, function(x) if(is.numeric(x)) mean(x, na.rm=TRUE) else NA_real_),
+#  SD = sapply(df, function(x) if(is.numeric(x)) sd(x, na.rm=TRUE) else NA_real_),
+#  Min = sapply(df, function(x) if(is.numeric(x)) min(x, na.rm=TRUE) else NA_real_),
+#  Max = sapply(df, function(x) if(is.numeric(x)) max(x, na.rm=TRUE) else NA_real_)
+#)
 
--   Reproducible analytic documentation
 
-These analyses mirror tasks typical for health systems, payers, ACOs, and government health policy agencies.
+# Add categories for Categorical Variables
+#categorical_vars <- names(df)[sapply(df, is.character)]
+
+#codebook_long <- codebook_long %>%
+#  mutate(
+ #   Categories = ifelse(
+#      Variable %in% categorical_vars,
+#      sapply(Variable, function(v) paste(unique(df[[v]]), collapse = ", ")),
+#      NA_character_
+ #     ),
+#    Description = NA_character_ # Fill in manually if desired
+#  )
+
+# Display Table
+#codebook_long %>%
+#  kable(caption = "Codebook: Variable Details", booktabs = TRUE)
+```
+
+## Methods
+
+**Data Source:** This analysis used a synthetic healthcare claims dataset containing patient demogrpahics, admission and discharge dates, billing information, and associated medical conditions.
+
+A synthetic healthcare claims dataset was used for this analysis from Kaggle. Variables included: name, age, gender, blood type, medical condition, dates of admission and discharge, doctor, hospital, insurance provider, billing, admissions type, medications, test results).
+
+**Analysis Workflow:**
+
+-   **Data Cleaning & Pre-processing**
+
+    -   Checked missingness and duplicates
+
+    -   Recoded categorical variables and created age groups
+
+    -   Calculated derived metrics: `length_of_stay`, `billing_per_day`
+
+-   **Univariate Analysis**
+
+    -   Numeric distributions: age, billing, LOS
+
+    -   Categorical frequencies: gender, insurance, medical conditions, medications, test results
+
+-   **Bivariate Analysis**
+
+    -   Medical condition x gender/age group
+
+    -   Billing x insurance/admission type
+
+-   **Time Series Analysis**
+
+    -   Weekly admissions
+
+    -   day-of-week patterns
+
+-   **Correlation Analysis**
+
+    -   Pairwise correlation of numeric and encoded categorical variables
+
+-   **Reproducibility**
+
+    -   Tidyverse pipelines
+
+    -   figures and tables saved to organized outputs
+
+    -   session information exported
 
 ## Data Cleaning & Processing
 
-## Uni variate Analysis
+```{r data cleaning, echo = TRUE}
+
+clean_df <- df %>%
+  mutate(
+    date_of_admission = ymd(date_of_admission),
+    discharge_date = ymd(discharge_date), 
+    
+    length_of_stay = as.numeric(discharge_date - date_of_admission),
+    
+    age_group = cut(
+      age, 
+      breaks = seq(0, 100, by = 10), 
+      labels = paste(seq(0, 90, 10), seq(10, 100, 10), sep = "-"),
+      include.lowest = TRUE,
+      right = FALSE
+    ),
+    
+    billing_per_day = billing_amount / length_of_stay
+  ) %>%
+  filter(!is.na(length_of_stay), length_of_stay >= 0)
+
+
+clean_df %>% glimpse ()
+
+# Summary statistics for numeric variables
+skim(clean_df)
+
+# Count of missing values per variable
+clean_df %>%
+  summarise(across(everything(), ~sum(is.na(.)))) %>%
+  pivot_longer(cols = everything(), names_to = "Variable", values_to = "Missing_Count") %>%
+  arrange(desc(Missing_Count)) %>%
+  kable()
+```
+
+**Notes on Cleaning:** Categorical variables were recoded with meaningful labels. Missing values were identified; strategies for handling missingness include removal or imputation (as implied). Date variables were converted to Date objects. Numeric variables were checked for outliers using IQR and visual inspection.
+
+## Exploratory Data Analysis
+
+### Summary Statistics
+
+```{r EDA, echo = TRUE}
+
+skim(clean_df)
+
+# Counts and Percentages for key categorical variables
+categorical_vars <- clean_df %>%
+  select_if(is.character)
+
+```
+
+```{r Age Pyramid, echo = TRUE}
+
+pyramid_df <- clean_df %>%
+  mutate(
+    # Create age groups
+    age_group = cut(age, 
+                    breaks = seq(0, 100, by = 10),
+                    right = FALSE, 
+                    include.lowest = TRUE),
+    
+    # Cleaning up labels
+    age_group = gsub("\\[|\\)", "", age_group), # Removes Brackets
+    age_group = gsub(",", "-", age_group)       # Replaces comma with dash
+  ) %>%
+  
+  # Counting by age_group and gender
+  count(age_group, gender) %>%
+  
+  mutate(
+    n = ifelse(gender == "Male", -n, n), # Male values are negative
+    
+    # Prepare labels for inside bars
+    label_text = abs(n),
+    label_y = n/2
+  ) 
+
+
+ggplot(pyramid_df, aes(x = age_group, y = n, fill = gender)) +
+  geom_bar(stat = "identity", width = 0.9) +
+  geom_text(aes(y = label_y, label = label_text),
+            color = "white", size = 3.5) +
+  coord_flip() +
+  scale_y_continuous(labels = abs) +
+  labs(title = "Age Pyramid",
+       x = "Age Group", y = "Population Count") + 
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+```
+
+**Interpretation:** As this is a synthetic dataset, it will be noted that the differentiation between categorical variables is overall quite minute. There is a very even distribution of spread between the age of the insured versus the gender.
 
 ## Bivariate Analysis
 
+```{r Bivariate Analysis, echo = TRUE}
+
+clean_df %>%
+ ggplot() +
+  aes(x = medical_condition, y = billing_amount) +
+  geom_col(fill = "#112446") +
+  labs(x = "Medical Condition", y = "Billing Amount",
+    title = "Billing Amount from (all Insurance Providers) by Medical Condition"
+  ) +
+  theme_minimal()
+
+```
+
+```{r Billing x Diagnosis x Insurance Provider, echo = TRUE}
+
+ggplot(clean_df) +
+  aes(x = medical_condition, y = billing_amount,
+      fill = insurance_provider, group = insurance_provider) +
+  geom_bar(stat = "summary", fun = "sum", position = "dodge2") +
+  scale_fill_viridis_d(option = "viridis", direction = 1) +
+  labs(x = "Medical Condition", y = "Billing Amount",
+       title = "Billing Amount by Medical Condition",
+       subtitle = "Grouped by Insurance Provider",
+       fill = "Insurance Provider") +
+  ggthemes::theme_gdocs() +
+  theme(legend.text = element_text(),
+        legend.title = element_text(size = 12L))
+
+```
+
+**Interpretation:** Upon analyzing the Cost of Hospital Stay by Medical condition, it seems Diabetes seems to have the lowest cost per day whereas hypertension is more expensive.
+
 ## Time-Series Trends
+```{r Time Series, echo = TRUE}
+
+
+
+```
 
 ## Correlation Analysis
 
-## Conclusion 
+## Conclusion
 
 ## R Markdown
 

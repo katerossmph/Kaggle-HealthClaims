@@ -18,7 +18,7 @@ library(tibble)
 library(tidyr) 
 
 #### 01. Load Raw Data ####
-claims <- read_csv("data/raw/healthcare_dataset.csv")
+claims <- read_csv(here::here("data", "raw", "healthcare_dataset.csv"))
 
 # INSPECT THE DATA
   # check the structure: see columns, types, and sample rows
